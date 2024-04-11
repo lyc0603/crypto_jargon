@@ -122,7 +122,7 @@ class MyLoss(nn.CrossEntropyLoss):
         return super().forward(y_preds, batch_labels.flatten())
 
 
-# 定义使用的loss和optimizer，这里支持自定义
+# 定义使用的loss和optimizer
 optimizer = optim.Adam(optimizer_grouped_parameters, lr=learning_rate, weight_decay=weight_decay_rate)
 scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=num_warmup_steps, num_training_steps=num_train_steps)
 model.compile(loss=MyLoss(ignore_index=0), optimizer=optimizer, scheduler=scheduler, grad_accumulation_steps=grad_accum_steps)
