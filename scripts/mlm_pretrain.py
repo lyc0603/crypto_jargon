@@ -21,7 +21,7 @@ from torch.utils.data import DataLoader, Dataset
 
 
 # 语料路径和模型保存路径
-model_saved_path = '/home/yichen/crypto_jargon/processed_data/pretrain/model/bert_model.ckpt'
+model_saved_path_root = '/home/yichen/crypto_jargon/processed_data/pretrain/model/'
 dir_training_data = '/home/yichen/crypto_jargon/processed_data/pretrain/dataset'  # dir_training_data
 task_name = 'roberta'
 
@@ -34,11 +34,12 @@ learning_rate = 5e-6
 weight_decay_rate = 0.01  # 权重衰减
 num_warmup_steps = 3125
 num_train_steps = 32750
-steps_per_epoch = 1048
+steps_per_epoch = 1048 
+# steps_per_epoch = 10
 grad_accum_steps = 16  # 大于1即表明使用梯度累积
 epochs = num_train_steps * grad_accum_steps // steps_per_epoch
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
-print(device)
+
 
 # 读取数据集，构建数据张量
 class MyDataset(Dataset):
@@ -124,6 +125,15 @@ class MyLoss(nn.CrossEntropyLoss):
 
 # 定义使用的loss和optimizer
 optimizer = optim.Adam(optimizer_grouped_parameters, lr=learning_rate, weight_decay=weight_decay_rate)
+
+if os.path.exists(model_saved_path_root + "last_model.ckpt"):
+    model.load_weights(model_saved_path_root + "last_model.ckpt")  # 加载模型权重
+if os.path.exists(model_saved_path_root + "last_step.pt"):
+    model.load_steps_params(model_saved_path_root + "last_step.pt")  # 加载训练进度参数，断点续训使用
+if os.path.exists(model_saved_path_root + 'last_optimizer.pt'):
+    state_dict = torch.load(model_saved_path_root +'last_optimizer.pt', map_location='cpu')  # 加载优化器，断点续训使用
+    optimizer.load_state_dict(state_dict)
+
 scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=num_warmup_steps, num_training_steps=num_train_steps)
 model.compile(loss=MyLoss(ignore_index=0), optimizer=optimizer, scheduler=scheduler, grad_accumulation_steps=grad_accum_steps)
 
@@ -145,7 +155,14 @@ class ModelCheckpoint(Callback):
         model.train_dataloader = get_train_dataloader()
 
     def on_epoch_end(self, global_step, epoch, logs=None):
-        model.save_weights(model_saved_path)
+
+        # save the model every ten epochs
+        if epoch % 10 == 0:
+            model.save_weights(model_saved_path_root + f"model_{epoch}.ckpt")
+
+        model.save_weights(model_saved_path_root + "last_model.ckpt")
+        model.save_steps_params(model_saved_path_root + "last_step.pt")
+        torch.save(optimizer.state_dict(), model_saved_path_root + 'last_optimizer.pt')
 
 if __name__ == '__main__':
     # 保存模型
