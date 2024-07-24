@@ -173,7 +173,6 @@ class TrainingDatasetRoBERTa(TrainingDataset):
         for rand, word in zip(rands, words):
             word_tokens = self.tokenizer.tokenize(text=word)[1:-1]
             word_token_ids = self.tokenizer.tokens_to_ids(word_tokens)
-            
 
             if rand < self.mask_rate:
                 word_mask_ids = [self.token_process(i) for i in word_token_ids]
@@ -183,7 +182,7 @@ class TrainingDatasetRoBERTa(TrainingDataset):
                 token_ids.extend(word_token_ids)
                 word_mask_ids = [0] * len(word_tokens)
                 mask_ids.extend(word_mask_ids)
-                
+
         return [token_ids, mask_ids]
 
     def paragraph_process(self, texts):
@@ -259,10 +258,36 @@ if __name__ == '__main__':
         read from clean data
         """
         files = '/home/yichen/crypto_jargon/processed_data/processed.txt'
+        count, texts = 0, []
+
         with open(files, "r") as f:
             for l in f:
                 for text in text_process(l):
-                    yield text
+                    texts.append(text)
+                    count += 1
+                    if count == 10:  # 10篇文章合在一起再处理
+                        yield texts
+                        count, texts = 0, []
+        if texts:
+            yield texts
+
+    # def some_texts():
+    #     '''挑选语料
+    #     '''
+
+    #     file_corpus =  '/home/yichen/crypto_jargon/processed_data/processed.txt'
+    #     count, texts = 0, []
+
+    #     with open(file_corpus, encoding='utf-8') as f:
+    #         for l in tqdm(f, desc=f'Load data from {file_corpus}'):
+    #             l = l.strip()
+    #             texts.extend(re.findall(u'.*?[\n。]+', l))
+    #             count += 1
+    #             if count == 10:  # 10篇文章合在一起再处理
+    #                 yield texts
+    #                 count, texts = 0, []
+    #     if texts:
+    #         yield texts
 
     def text_process(text):
         """
@@ -279,7 +304,10 @@ if __name__ == '__main__':
             yield result
 
     def word_segment(text):
-        return text
+        """
+        Word segmentation
+        """
+        return jieba.lcut(text)
 
     TD = TrainingDatasetRoBERTa(tokenizer, word_segment, sequence_length=sequence_length)
 
