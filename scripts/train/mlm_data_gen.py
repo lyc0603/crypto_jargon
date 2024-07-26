@@ -106,6 +106,8 @@ class TrainingDataset(object):
         """
         for instance in instances:
             input_ids, masked_lm_labels = instance[0], instance[1]
+            print(input_ids)
+            print(masked_lm_labels)
             assert len(input_ids) <= sequence_length
             features = collections.OrderedDict()
             features["input_ids"] = input_ids
@@ -168,6 +170,7 @@ class TrainingDatasetRoBERTa(TrainingDataset):
         """
         words = self.word_segment(text)
         rands = np.random.random(len(words))
+
 
         token_ids, mask_ids = [], []
         for rand, word in zip(rands, words):
