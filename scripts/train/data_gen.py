@@ -12,7 +12,6 @@ from typing import Callable
 
 import jieba
 import numpy as np
-import torch
 from bert4torch.tokenizers import Tokenizer, load_vocab
 
 from environ.constants import DATA_PATH, PROCESSED_DATA_PATH
@@ -20,9 +19,6 @@ from environ.constants import DATA_PATH, PROCESSED_DATA_PATH
 # Initialize jieba
 jieba.initialize()
 jieba.load_userdict(f"{PROCESSED_DATA_PATH}/new_words.txt")
-
-# Initialize cuda device
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 # Basic parameters
 MAXLEN = 256
@@ -181,6 +177,7 @@ class TrainingDatasetRoBerta(TrainingDataset):
     def token_process(self, token_id: int):
         """
         Process the token
+        80% to mask, 10% to original, 10% to random
         """
 
         rand = np.random.random()
@@ -212,6 +209,11 @@ class TrainingDatasetRoBerta(TrainingDataset):
                 word_mask_ids = [self.token_process(i) for i in word_token_ids]
                 token_ids.extend(word_mask_ids)
                 mask_ids.extend(word_token_ids)
+
+                print(word)
+                print(word_tokens)
+                print(word_token_ids) 
+                print(word_mask_ids)               
             else:
                 token_ids.extend(word_token_ids)
                 word_mask_ids = [0] * len(word_tokens)
@@ -265,7 +267,6 @@ def text_process(text: str):
     """
 
     texts = text_segmentate(text, 23, "\n。")
-    print(texts)
     result = ""
     for text in texts:
         if result and len(result) + len(text) > MAXLEN * 1.3:
