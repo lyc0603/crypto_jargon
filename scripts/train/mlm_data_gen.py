@@ -14,15 +14,13 @@ import jieba
 import numpy as np
 from bert4torch.tokenizers import Tokenizer, load_vocab
 
-from environ.constants import DATA_PATH, PROCESSED_DATA_PATH
+from environ.constants import DATA_PATH, PROCESSED_DATA_PATH, MAXLEN
 
 # Initialize jieba
 jieba.initialize()
 jieba.load_userdict(f"{PROCESSED_DATA_PATH}/new_words.txt")
 
 # Basic parameters
-MAXLEN = 256
-BATCH_SIZE = 32
 EPOCHS = 500
 NUM_WORDS = 61711
 
@@ -208,12 +206,7 @@ class TrainingDatasetRoBerta(TrainingDataset):
             if rand < self.mask_rate:
                 word_mask_ids = [self.token_process(i) for i in word_token_ids]
                 token_ids.extend(word_mask_ids)
-                mask_ids.extend(word_token_ids)
-
-                print(word)
-                print(word_tokens)
-                print(word_token_ids) 
-                print(word_mask_ids)               
+                mask_ids.extend(word_token_ids)             
             else:
                 token_ids.extend(word_token_ids)
                 word_mask_ids = [0] * len(word_tokens)
@@ -320,7 +313,7 @@ if __name__ == "__main__":
     else:
         # load and simplify vocab
         token_dict = load_vocab(
-            dict_path=f"{PROCESSED_DATA_PATH}//pretrain/dataset",
+            dict_path=f"{PROCESSED_DATA_PATH}/pretrain/dataset",
             simplified=False,
             startswith=["[PAD]", "[UNK]", "[CLS]", "[SEP]", "[MASK]"],
         )

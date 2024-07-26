@@ -7,6 +7,11 @@ DATA_PATH = PROJECT_ROOT / "data"
 FIGURE_PATH = PROJECT_ROOT / "figures"
 PROCESSED_DATA_PATH = PROJECT_ROOT / "processed_data"
 
+# Global constants
+MAXLEN = 256
+BATCH_SIZE = 32
+
+
 SEEDS = [
     "法币",
     "大饼",
