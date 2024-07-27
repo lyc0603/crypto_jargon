@@ -14,7 +14,7 @@ import jieba
 import numpy as np
 from bert4torch.tokenizers import Tokenizer, load_vocab
 
-from environ.constants import DATA_PATH, PROCESSED_DATA_PATH, MAXLEN
+from environ.constants import DATA_PATH, MAXLEN, PROCESSED_DATA_PATH
 
 # Initialize jieba
 jieba.initialize()
@@ -136,11 +136,11 @@ class TrainingDataset:
 
         db = shelve.open(record_name)
         for texts in corpus:
-            instance = self.paragraph_process(texts)
-            count = self.serialize(instance, db, count)
+            instances = self.paragraph_process(texts)
+            count = self.serialize(instances, db, count)
 
         db.close()
-        del instance
+        del instances
         gc.collect()
 
         # record the information
