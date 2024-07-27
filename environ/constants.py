@@ -10,7 +10,9 @@ PROCESSED_DATA_PATH = PROJECT_ROOT / "processed_data"
 # Global constants
 MAXLEN = 256
 BATCH_SIZE = 32
-
+EPOCHS = 500
+NUM_WORDS = 61711
+MAX_FILE_NUM = 40
 
 SEEDS = [
     "法币",
