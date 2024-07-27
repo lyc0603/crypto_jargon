@@ -105,7 +105,7 @@ def get_train_dataloader():
         files_training_data = [
             file.split(".")[0] for file in files_training_data if "train" in file
         ]
-        # 防止使用到正在生成的文件
+        # avoid using the generating file
         files_training_data = [
             i for i in set(files_training_data) if files_training_data.count(i) == 4
         ]
@@ -172,9 +172,11 @@ class MyLoss(nn.CrossEntropyLoss):
         super().__init__(**kwargs)
 
     def forward(self, output, batch_labels):
+        """
+        Forward pass
+        """
         y_preds = output[-1]
         y_preds = y_preds.reshape(-1, y_preds.shape[-1])
-        print(y_preds)
         return super().forward(y_preds, batch_labels.flatten())
 
 
@@ -214,14 +216,15 @@ class ModelCheckpoint(Callback):
 
     def on_dataloader_end(self, logs=None):
         model.train_dataloader.dataset.db.close()
-        # for suffix in [".bak", ".dat", ".dir", ".json"]:
-        #     file_remove = os.path.join(dir_training_data, task_name + suffix)
-        #     try:
-        #         os.remove(file_remove)
-        #     except:
-        #         print(f"Failed to remove training data {file_remove}.")
+        for suffix in [".bak", ".dat", ".dir", ".json"]:
+            file_remove = os.path.join(dir_training_data, TASK_NAME + suffix)
+            try:
+                os.remove(file_remove)
+                print(f"Removed training data {file_remove}.")
+            except:
+                print(f"Failed to remove training data {file_remove}.")
 
-        # 重新生成dataloader
+        # regenerate dataloader
         model.train_dataloader = get_train_dataloader()
 
     def on_epoch_end(self, global_step, epoch, logs=None):

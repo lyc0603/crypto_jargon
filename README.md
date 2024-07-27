@@ -1,8 +1,7 @@
 # crypto_jargon
 Project to study the cryptocurrency Chinese jargons.
 
-[![python](https://img.shields.io/badge/Python-v3.10.12-3776AB.svg?style=flat&logo=python&logoColor=white)](https://www.python.org)
-[![build status](https://github.com/pre-commit/pre-commit/actions/workflows/main.yml/badge.svg)](https://github.com/xujiahuayz/pbs/actions/workflows/pylint.yml)
+[![python](https://img.shields.io/badge/Python-v3.11.7-3776AB.svg?style=flat&logo=python&logoColor=white)](https://www.python.org)
 
 ## Setup
 
