@@ -6,12 +6,17 @@ import json
 import os
 import time
 
+import jieba
 from bert4torch.tokenizers import Tokenizer, load_vocab
 
-from environ.constants import (DATA_PATH, MAX_FILE_NUM, MAXLEN, NUM_WORDS,
+from environ.constants import (DATA_PATH, MAX_FILE_NUM, MAXLEN,
                                PROCESSED_DATA_PATH)
 from environ.pretrain.mlm_data_gen import (TrainingDatasetRoBerta, corpus,
                                            word_segment)
+
+# Initialize jieba
+jieba.initialize()
+jieba.load_userdict(f"{PROCESSED_DATA_PATH}/new_words.txt")
 
 dir_training_data = f"{PROCESSED_DATA_PATH}/pretrain/dataset"
 
@@ -23,7 +28,7 @@ if os.path.exists(f"{DATA_PATH}/RoBERTa-wwm-ext/tokenizer_config.json"):
 else:
     # load and simplify vocab
     token_dict = load_vocab(
-        dict_path=f"{PROCESSED_DATA_PATH}/pretrain/dataset",
+        dict_path=f"{DATA_PATH}/RoBERTa-wwm-ext/vocab.txt",
         simplified=False,
         startswith=["[PAD]", "[UNK]", "[CLS]", "[SEP]", "[MASK]"],
     )
@@ -35,14 +40,16 @@ else:
             f"{PROCESSED_DATA_PATH}/vocab.txt", "r", encoding="utf-8"
         ).readlines()
     ]
-    print(words)
     user_dict = []
     for w in words:
         if w not in token_dict:
             token_dict[w] = len(token_dict)
             user_dict.append(w)
-        if len(user_dict) == NUM_WORDS:
-            break
+            print(f"{w} is added to token_dict")
+        else:
+            print(f"{w} is already in token_dict")
+        # if len(user_dict) == NUM_WORDS:
+        #     break
     compound_tokens = [pure_tokenizer.encode(w)[0][1:-1] for w in user_dict]
     json.dump(
         [token_dict, compound_tokens],
@@ -52,6 +59,7 @@ else:
 tokenizer = Tokenizer(
     token_dict,
     do_lower_case=True,
+    pre_tokenize=lambda s: jieba.cut(s)
 )
 
 # dataset

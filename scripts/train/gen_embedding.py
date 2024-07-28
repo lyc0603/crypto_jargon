@@ -2,7 +2,7 @@
 Script to generate word embedding using RoBERTa model
 """
 
-from scripts.mlm_pretrain import train_dataloader
+from environ.pretrain.mlm_pretrain import get_train_dataloader
 import torch
 from tqdm import tqdm
 from bert4torch.models import build_transformer_model, BaseModel
@@ -30,8 +30,8 @@ pretrained_model = build_transformer_model(
     compound_tokens=compound_tokens,
 ).to(device)
 
-if os.path.exists(model_saved_path_root + "model_150.ckpt"):
-    pretrained_model.load_weights(model_saved_path_root + "model_150.ckpt")  # 加载模型权重
+if os.path.exists(model_saved_path_root + "model_0.ckpt"):
+    pretrained_model.load_weights(model_saved_path_root + "model_0.ckpt")  # 加载模型权重
 
 class Model(BaseModel):
     def __init__(self, pool_method="cls"):
@@ -69,12 +69,14 @@ model = Model().to(device)
 
 if __name__ == "__main__":
 
+    train_dataloader = get_train_dataloader(batch_size=None, shuffle=False)
+
     train_embeddings = []
     for token_ids_list, labels in tqdm(train_dataloader):
         print(token_ids_list, labels)
         for token_ids in token_ids_list:
-            # train_embeddings.append(model.encode(token_ids))
-        # if len(train_embeddings) >= 20:
-        #     break
+            train_embeddings.append(model.encode(token_ids))
+        if len(train_embeddings) >= 20:
+            break
     train_embeddings = torch.cat(train_embeddings, dim=0).cpu().numpy()
     print(train_embeddings)

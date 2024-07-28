@@ -25,7 +25,7 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 dir_training_data = f"{PROCESSED_DATA_PATH}/pretrain/dataset"
 config_path = f"{DATA_PATH}/RoBERTa-wwm-ext/bert_config.json"
 checkpoint_path = f"{DATA_PATH}/RoBERTa-wwm-ext/pytorch_model.bin"
-model_saved_path_root = f'{PROCESSED_DATA_PATH}/pretrain/model/'
+model_saved_path_root = f"{PROCESSED_DATA_PATH}/pretrain/model/"
 TASK_NAME = "roberta"
 
 # Parameters
@@ -94,7 +94,7 @@ def collate_fn(batch: list):
 
 
 # randomly select a file from the corpus folder and generate a dataloader
-def get_train_dataloader():
+def get_train_dataloader(batch_size: int | None = BATCH_SIZE, shuffle: bool = True):
     """
     Function to get the training dataloader
     """
@@ -118,8 +118,8 @@ def get_train_dataloader():
             cur_load_file = file_new.split(".")[0]
             train_dataloader = DataLoader(
                 MyDataset(cur_load_file),
-                batch_size=BATCH_SIZE,
-                shuffle=True,
+                batch_size=batch_size,
+                shuffle=shuffle,
                 collate_fn=collate_fn,
             )
             break
@@ -187,15 +187,13 @@ optimizer = optim.Adam(
 
 # load the model
 if os.path.exists(model_saved_path_root + "last_model.ckpt"):
-    model.load_weights(model_saved_path_root + "last_model.ckpt") 
+    model.load_weights(model_saved_path_root + "last_model.ckpt")
 if os.path.exists(model_saved_path_root + "last_step.pt"):
-    model.load_steps_params(
-        model_saved_path_root + "last_step.pt"
-    )  
+    model.load_steps_params(model_saved_path_root + "last_step.pt")
 if os.path.exists(model_saved_path_root + "last_optimizer.pt"):
     state_dict = torch.load(
         model_saved_path_root + "last_optimizer.pt", map_location="cpu"
-    ) 
+    )
     optimizer.load_state_dict(state_dict)
 
 scheduler = get_linear_schedule_with_warmup(

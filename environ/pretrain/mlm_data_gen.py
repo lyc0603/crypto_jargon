@@ -12,7 +12,7 @@ import jieba
 import numpy as np
 from bert4torch.tokenizers import Tokenizer
 
-from environ.constants import  MAXLEN, PROCESSED_DATA_PATH, MAX_FILE_NUM
+from environ.constants import MAX_FILE_NUM, MAXLEN, PROCESSED_DATA_PATH
 
 # Initialize jieba
 jieba.initialize()
@@ -69,39 +69,58 @@ class TrainingDataset:
         padding is the list of padding value
         """
 
-        instances, instance = [], [[start] for start in starts]
+        # for text in texts:
+        #     # process single sentence
+        #     sub_instance = self.sentence_process(text)
+        #     sub_instance = [i[:self.sequence_length - 2] for i in sub_instance]
+        #     new_length = len(instance[0]) + len(sub_instance[0])
+
+        #     # if the new length is about to overflow
+        #     if new_length > self.sequence_length - 1:
+        #         # insert end and padding
+        #         complete_instance = []
+        #         for item, end, pad in zip(instance, ends, paddings):
+        #             item.append(end)
+        #             item = self.padding(item, pad)
+        #             complete_instance.append(item)
+        #         # store the result and reset the instance
+        #         instances.append(complete_instance)
+        #         instance = [[start] for start in starts]
+
+        #     # sample extension
+        #     for item, sub_item in zip(instance, sub_instance):
+        #         item.extend(sub_item)
+
+        # # insert end and padding
+        # complete_instance = []
+        # for item, end, pad in zip(instance, ends, paddings):
+        #     item.append(end)
+        #     item = self.padding(item, pad)
+        #     complete_instance.append(item)
+
+        # # store the final instance
+        # instances.append(complete_instance)
+
+        instances = []
 
         for text in texts:
+            instance = [[start] for start in starts]
             # process single sentence
             sub_instance = self.sentence_process(text)
             sub_instance = [i[:self.sequence_length - 2] for i in sub_instance]
-            new_length = len(instance[0]) + len(sub_instance[0])
-
-            # if the new length is about to overflow
-            if new_length > self.sequence_length - 1:
-                # insert end and padding
-                complete_instance = []
-                for item, end, pad in zip(instance, ends, paddings):
-                    item.append(end)
-                    item = self.padding(item, pad)
-                    complete_instance.append(item)
-                # store the result and reset the instance
-                instances.append(complete_instance)
-                instance = [[start] for start in starts]
 
             # sample extension
             for item, sub_item in zip(instance, sub_instance):
                 item.extend(sub_item)
 
-        # insert end and padding
-        complete_instance = []
-        for item, end, pad in zip(instance, ends, paddings):
-            item.append(end)
-            item = self.padding(item, pad)
-            complete_instance.append(item)
-
-        # store the final instance
-        instances.append(complete_instance)
+            # insert end and padding
+            complete_instance = []
+            for item, end, pad in zip(instance, ends, paddings):
+                item.append(end)
+                item = self.padding(item, pad)
+                complete_instance.append(item)
+            # store the result and reset the instance
+            instances.append(complete_instance)
 
         return instances
 
@@ -205,7 +224,7 @@ class TrainingDatasetRoBerta(TrainingDataset):
                 token_ids.extend(word_token_ids)
                 word_mask_ids = [0] * len(word_tokens)
                 mask_ids.extend(word_mask_ids)
-
+        
         return [token_ids, mask_ids]
 
     def paragraph_process(self, texts: list[str]):
@@ -279,7 +298,7 @@ def corpus():
             for text in text_process(l):
                 texts.append(text)
                 count += 1
-                if count == MAX_FILE_NUM:
+                if count == 10:
                     yield texts
                     texts, count = [], 0
 
