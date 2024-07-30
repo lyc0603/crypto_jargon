@@ -5,7 +5,6 @@ Class to pretrain a RoBERTa model on the crypto jargon dataset
 import json
 import os
 import random
-import shelve
 import time
 
 import torch
@@ -14,8 +13,8 @@ import torch.optim as optim
 from bert4torch.callbacks import Callback
 from bert4torch.models import build_transformer_model
 from bert4torch.optimizers import get_linear_schedule_with_warmup
-from bert4torch.snippets import sequence_padding
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader
+from environ.pretrain.data import MyDataset, collate_fn
 
 from environ.constants import BATCH_SIZE, DATA_PATH, PROCESSED_DATA_PATH
 
@@ -36,61 +35,6 @@ NUM_TRAIN_STEPS = 32750
 STEPS_PER_EPOCH = 1048
 GRAD_ACCUM_STEPS = 16
 EPOCHS = NUM_TRAIN_STEPS * GRAD_ACCUM_STEPS // STEPS_PER_EPOCH
-
-
-# load the dataset and convert to tensors
-class MyDataset(Dataset):
-    """
-    Dataset class for loading the pretraining data
-    """
-
-    def __init__(self, file: str):
-        super(MyDataset, self).__init__()
-        self.file = file
-        self.len = self._get_dataset_length()
-        self.db = self._load_data()
-
-    def __getitem__(self, index: int):
-        """
-        get the item at the given index
-        """
-        return self.db[str(index)]
-
-    def __len__(self):
-        """
-        get the length of the dataset
-        """
-        return self.len
-
-    def _get_dataset_length(self):
-        """
-        get the recorded length of the dataset
-        """
-        file_record_info = self.file + ".json"
-        record_info = json.load(open(file_record_info, "r", encoding="utf-8"))
-        return record_info["samples_num"]
-
-    def _load_data(self):
-        """
-        load the data from the file
-        """
-        return shelve.open(self.file)
-
-
-def collate_fn(batch: list):
-    """
-    function to collate the batch
-    """
-    batch_token_ids, batch_labels = [], []
-    for item in batch:
-        batch_token_ids.append(item["input_ids"])
-        batch_labels.append(item["masked_lm_labels"])
-
-    batch_token_ids = torch.tensor(
-        sequence_padding(batch_token_ids), dtype=torch.long, device=device
-    )
-    batch_labels = torch.tensor(batch_labels, dtype=torch.long, device=device)
-    return [batch_token_ids], batch_labels
 
 
 # randomly select a file from the corpus folder and generate a dataloader
@@ -188,13 +132,16 @@ optimizer = optim.Adam(
 # load the model
 if os.path.exists(model_saved_path_root + "last_model.ckpt"):
     model.load_weights(model_saved_path_root + "last_model.ckpt")
+    print("Loaded the last model.")
 if os.path.exists(model_saved_path_root + "last_step.pt"):
     model.load_steps_params(model_saved_path_root + "last_step.pt")
+    print("Loaded the last step.")
 if os.path.exists(model_saved_path_root + "last_optimizer.pt"):
     state_dict = torch.load(
         model_saved_path_root + "last_optimizer.pt", map_location="cpu"
     )
     optimizer.load_state_dict(state_dict)
+    print("Loaded the last optimizer.")
 
 scheduler = get_linear_schedule_with_warmup(
     optimizer, num_warmup_steps=NUM_WARMUP_STEPS, num_training_steps=NUM_TRAIN_STEPS

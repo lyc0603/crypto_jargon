@@ -2,9 +2,6 @@
 Script to pretrain a RoBERTa model on the crypto jargon dataset
 """
 
-import sys
-sys.path.append("/home/yichen/crypto_jargon")
-
 from environ.pretrain.mlm_pretrain import (
     ModelCheckpoint,
     model,
