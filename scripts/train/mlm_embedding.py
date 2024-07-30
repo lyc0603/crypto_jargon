@@ -22,7 +22,7 @@ checkpoint_path = f"{DATA_PATH}/RoBERTa-wwm-ext/pytorch_model.bin"
 train_dataloader = DataLoader(
     MyDataset(cur_load_file),
     batch_size=1,
-    shuffle=True,
+    shuffle=False,
     collate_fn=collate_fn,
 )
 
@@ -42,8 +42,7 @@ model = build_transformer_model(
 ).to(device)
 model.load_weights(f"{PROCESSED_DATA_PATH}/pretrain/model/" + "model_10.ckpt")
 
-emb = []
-for instances in tqdm(train_dataloader):
+for idx, instances in enumerate(tqdm(train_dataloader)):
 
     bert_emb = model.predict(
         [
@@ -51,5 +50,6 @@ for instances in tqdm(train_dataloader):
         ]
     )
 
-    bert_emb = bert_emb
-    emb.append(bert_emb)
+    bert_emb = [i.cpu().detach().numpy()for i in bert_emb[0]]
+    with open(f"{PROCESSED_DATA_PATH}/bert_emb/emb_{idx}.pkl", "wb") as f:
+        pickle.dump(bert_emb, f, protocol=pickle.HIGHEST_PROTOCOL)
