@@ -14,6 +14,7 @@ from environ.constants import (DATA_PATH, MAX_FILE_NUM, MAXLEN, NUM_WORDS,
 from environ.pretrain.mlm_data_gen import (TrainingDatasetRoBerta, corpus,
                                            word_segment)
 
+
 # Initialize jieba
 jieba.initialize()
 jieba.load_userdict(f"{PROCESSED_DATA_PATH}/new_words.txt")

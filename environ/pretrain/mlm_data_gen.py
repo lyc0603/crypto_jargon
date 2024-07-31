@@ -69,38 +69,6 @@ class TrainingDataset:
         padding is the list of padding value
         """
 
-        # for text in texts:
-        #     # process single sentence
-        #     sub_instance = self.sentence_process(text)
-        #     sub_instance = [i[:self.sequence_length - 2] for i in sub_instance]
-        #     new_length = len(instance[0]) + len(sub_instance[0])
-
-        #     # if the new length is about to overflow
-        #     if new_length > self.sequence_length - 1:
-        #         # insert end and padding
-        #         complete_instance = []
-        #         for item, end, pad in zip(instance, ends, paddings):
-        #             item.append(end)
-        #             item = self.padding(item, pad)
-        #             complete_instance.append(item)
-        #         # store the result and reset the instance
-        #         instances.append(complete_instance)
-        #         instance = [[start] for start in starts]
-
-        #     # sample extension
-        #     for item, sub_item in zip(instance, sub_instance):
-        #         item.extend(sub_item)
-
-        # # insert end and padding
-        # complete_instance = []
-        # for item, end, pad in zip(instance, ends, paddings):
-        #     item.append(end)
-        #     item = self.padding(item, pad)
-        #     complete_instance.append(item)
-
-        # # store the final instance
-        # instances.append(complete_instance)
-
         instances = []
 
         for text in texts:

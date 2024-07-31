@@ -49,10 +49,12 @@ def get_train_dataloader(batch_size: int | None = BATCH_SIZE, shuffle: bool = Tr
         files_training_data = [
             file.split(".")[0] for file in files_training_data if "train" in file
         ]
+
         # avoid using the generating file
         files_training_data = [
             i for i in set(files_training_data) if files_training_data.count(i) == 4
         ]
+
         if files_training_data:
             file_train = random.choice(files_training_data)
             for suffix in [".bak", ".dat", ".dir", ".json"]:
