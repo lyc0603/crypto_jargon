@@ -4,9 +4,10 @@ Script to generate the percision@K
 
 import pandas as pd
 
-from environ.constants import MODEL, PROCESSED_DATA_PATH, REP_JARGONS
+from environ.constants import MODEL, PROCESSED_DATA_PATH, REP_JARGONS, WORD_EMB_EVAL
 
 df_res = pd.DataFrame(index=range(1, 101, 1))
+df_res["k"] = df_res.index
 
 # load the xlsx file
 for model in MODEL:
@@ -20,3 +21,5 @@ for model in MODEL:
         pk = df_target.sum().sum() / (df_target.shape[0] * df_target.shape[1])
         model_res.append(pk)
     df_res[model] = model_res
+
+df_res_discrete = df_res.loc[WORD_EMB_EVAL].copy()

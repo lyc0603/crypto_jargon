@@ -9,9 +9,10 @@ FIGURE_PATH = PROJECT_ROOT / "figures"
 TABLE_PATH = PROJECT_ROOT / "tables"
 
 # Model
-MODEL= ["cbow"]
+MODEL= ["cbow", "sg"]
 MODEL_NAMING_DICT = {
     "cbow": "W2V+CBOW",
+    "sg": "W2V+SG"
 }
 
 # word embedding evaluation
