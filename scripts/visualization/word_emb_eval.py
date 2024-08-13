@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from environ.constants import MODEL, MODEL_NAMING_DICT, WORD_EMB_EVAL, FIGURE_PATH
 from scripts.eval.word_emb_eval import df_res
 
-FONT_SIZE = 12
+FONT_SIZE = 15
 
 
 # only keep the row that in WORD_EMB_EVAL
@@ -14,8 +14,9 @@ df_res = df_res.loc[WORD_EMB_EVAL]
 
 # model format mapping
 MODEL_FORMAT_MAPPING = {
-    "cbow": {"marker": "o", "markersize": 5, "color": "blue"},
-    "sg": {"marker": "*", "markersize": 8, "color": "red"},
+    "cbow": {"marker": "o", "markersize": 7, "color": "blue"},
+    "sg": {"marker": "*", "markersize": 10, "color": "red"},
+    "lda": {"marker": "v", "markersize": 8, "color": "green"},
 }
 
 # plot the results
